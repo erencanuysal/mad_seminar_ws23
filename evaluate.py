@@ -24,7 +24,7 @@ class Evaluator:
         super(Evaluator, self).__init__()
 
         self.model = model
-        self.device = model.device
+        self.device = 'cpu'
         self.test_data_dict = test_data_dict
         self.criterion_rec = L1Loss().to(device)
         self.l_pips_sq = lpips.LPIPS(pretrained=True, net='squeeze',
