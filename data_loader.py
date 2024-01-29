@@ -10,7 +10,7 @@ from torchvision import transforms
 
 class TrainDataset(Dataset):
 
-    def __init__(self, data: List[str], target_size=(64, 64)):
+    def __init__(self, data: List[str], target_size=(128, 128)):
         """
         Loads images from data
 
@@ -40,7 +40,7 @@ class TrainDataset(Dataset):
 
 
 class TrainDataModule(pl.LightningDataModule):
-    def __init__(self, split_dir: str, target_size=(64, 64), batch_size: int = 32):
+    def __init__(self, split_dir: str, target_size=(128, 128), batch_size: int = 32):
         """
         Data module for training
 
@@ -86,7 +86,7 @@ class TrainDataModule(pl.LightningDataModule):
 
 class TestDataset(Dataset):
 
-    def __init__(self, img_csv: str, pos_mask_csv: str, neg_mask_csv: str, target_size=(64, 64)):
+    def __init__(self, img_csv: str, pos_mask_csv: str, neg_mask_csv: str, target_size=(128, 128)):
         """
         Loads anomalous images, their positive masks and negative masks from data_dir
 

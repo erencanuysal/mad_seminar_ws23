@@ -24,7 +24,7 @@ class Evaluator:
         super(Evaluator, self).__init__()
 
         self.model = model
-        self.device = 'cpu'
+        self.device = device
         self.test_data_dict = test_data_dict
         self.criterion_rec = L1Loss().to(device)
         self.l_pips_sq = lpips.LPIPS(pretrained=True, net='squeeze',
@@ -80,7 +80,7 @@ class Evaluator:
                     count = str(idx * nr_batches + i)
                     x_i = inputs[i][0]
                     x_rec_i = reconstructions[i][0] if reconstructions is not None else None
-                    ano_map_i = anomaly_maps[i][0].detach().numpy()
+                    ano_map_i = anomaly_maps[i].cpu().detach().numpy()
                     mask_i = masks[i][0].cpu().detach().numpy()
                     neg_mask_i = neg_masks[i][0].cpu().detach().numpy()
                     bboxes = cv2.cvtColor(neg_mask_i * 255, cv2.COLOR_GRAY2RGB)
