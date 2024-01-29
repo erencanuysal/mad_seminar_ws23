@@ -682,9 +682,11 @@ class NAE_L2_base(nn.Module):
     def predict(self, x):
         return self.forward(x)
     
-    def detect_anomaly(self, x: Tensor):
-        rec = self(x)
-        anomaly_map = torch.abs(x - rec)
+    def detect_anomaly(model, x):
+        x1=x.to('cuda')
+        z = model.encode(x1)
+        rec = model.decode(z)
+        anomaly_map = torch.abs(x1 - rec)
         anomaly_score = torch.sum(anomaly_map, dim=(1, 2, 3))
         return {
             'reconstruction': rec,

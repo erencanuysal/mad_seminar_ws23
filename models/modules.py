@@ -201,7 +201,49 @@ class DeConvNet2(nn.Module):
 ConvNet for CIFAR10, following architecture in (Ghosh et al., 2019)
 but excluding batch normalization
 '''
+class GivenAE_encoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Conv2d(1, 32, 3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.Conv2d(256, 256, 3, stride=2, padding=1, bias=False),
+        )
+    def forward(self, x):
+        return self.net(x)
 
+class GivenAE_decoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.ConvTranspose2d(256, 256, 3, stride=2, padding=1, output_padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1, bias=False),
+            nn.Conv2d(16, 1, 3, stride=1, padding=1),
+        )
+    def forward(self, x):
+        return self.net(x)
+        
 class ConvNet64(nn.Module):
     """ConvNet architecture for CelebA64 following Ghosh et al., 2019"""
     def __init__(self, in_chan=3, out_chan=64, nh=32, out_activation='linear', activation='relu',
