@@ -5,9 +5,9 @@ import torch.nn.functional as F
 from torchvision.utils import make_grid
 from models.ae import AE
 from models.modules import IsotropicLaplace, DummyDistribution
-from models.energybased import SampleBuffer, SampleBufferV2
-from models.langevin import sample_langevin, sample_langevin_v2
-from models.utils import weight_norm
+from utils.energybased import SampleBuffer, SampleBufferV2
+from utils.langevin import sample_langevin, sample_langevin_v2
+from utils.utils import weight_norm
 
 
 class FFEBM(nn.Module):

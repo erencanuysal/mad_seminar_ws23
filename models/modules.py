@@ -7,8 +7,8 @@ from torch import optim
 from torch.distributions import Normal 
 from torch.distributions.multivariate_normal import MultivariateNormal
 import numpy as np
-from models.spectral_norm import spectral_norm
-from models import igebm
+from utils.spectral_norm import spectral_norm
+from utils import igebm
 
 
 class DummyDistribution(nn.Module):
