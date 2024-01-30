@@ -135,14 +135,14 @@ class Evaluator:
                                   str(np.round(res_anomaly, 2)) + ', TP: ' + str(tp),
                                   str(np.round(res_healthy, 2)) + ', FP: ' + str(fp)]
 
-                        #diffp, axarr = plt.subplots(1, len(elements), gridspec_kw={'wspace': 0, 'hspace': 0})
-                        #diffp.set_size_inches(len(elements) * 4, 4)
-                        #for idx_arr in range(len(axarr)):
-                         #   axarr[idx_arr].axis('off')
-                          #  v_max = v_maxs[idx_arr]
-                           # c_map = 'gray' if v_max == 1 else 'plasma'
-                           # axarr[idx_arr].imshow(np.squeeze(elements[idx_arr]), vmin=0, vmax=v_max, cmap=c_map)
-                           # axarr[idx_arr].set_title(titles[idx_arr])
+                        diffp, axarr = plt.subplots(1, len(elements), gridspec_kw={'wspace': 0, 'hspace': 0})
+                        diffp.set_size_inches(len(elements) * 4, 4)
+                        for idx_arr in range(len(axarr)):
+                            axarr[idx_arr].axis('off')
+                            v_max = v_maxs[idx_arr]
+                            c_map = 'gray' if v_max == 1 else 'plasma'
+                            axarr[idx_arr].imshow(np.squeeze(elements[idx_arr]), vmin=0, vmax=v_max, cmap=c_map)
+                            axarr[idx_arr].set_title(titles[idx_arr])
 
             for metric in test_metrics:
                 print('{} mean: {} +/- {}'.format(metric, np.nanmean(test_metrics[metric]),
