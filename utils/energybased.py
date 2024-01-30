@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.langevin import sample_langevin
+from utils.langevin import sample_langevin
 
 
 class EnergyBasedModel(nn.Module):
