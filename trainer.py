@@ -64,27 +64,27 @@ class NAE_Trainer():
             buffer_size= 0,
             bound= [0, 1])
         self.model =  NAE_L2_OMI(self.encoder, self.decoder, self.sampler_z, self.sampler_x, gamma= 1, l2_norm_reg_de= None, l2_norm_reg_en= 0.0001, T= 1.).to('cuda')
-    def save_list_to_file(data_list, file_path):
+    def save_list_to_file(self,data_list, file_path):
         with open(file_path, 'wb') as file:
             pickle.dump(data_list, file)
-    def roc_btw_arr(arr1, arr2):
+    def roc_btw_arr(self,arr1, arr2):
         true_label = np.concatenate([np.ones_like(arr1),
                                     np.zeros_like(arr2)])
         score = np.concatenate([arr1, arr2])
         return roc_auc_score(true_label, score)
 
-    def predict( m, dl, device, flatten=False):
+    def predict( self, dl, device, flatten=False):
         """run prediction for the whole dataset"""
         l_result = []
         for x in dl:
             with torch.no_grad():
                 if flatten:
                     x = x.view(len(x), -1)
-                pred = m.predict(x.cuda(device)).detach().cpu()
+                pred = self.model.predict(x.cuda(device)).detach().cpu()
             l_result.append(pred)
         return torch.cat(l_result)
 
-    def save_model(model, best=False, i_iter=None, i_epoch=None):
+    def save_model(self, best=False, i_iter=None, i_epoch=None):
         logdir="./logdir/"
         if best:
             pkl_name = "model_best.pkl"
@@ -93,7 +93,7 @@ class NAE_Trainer():
                 pkl_name = "model_iter_{}.pkl".format(i_iter)
             else:
                 pkl_name = "model_epoch_{}.pkl".format(i_epoch)
-        state = {"epoch": i_epoch, "model_state": model.state_dict(), 'iter': i_iter}
+        state = {"epoch": i_epoch, "model_state": self.model.state_dict(), 'iter': i_iter}
         save_path = os.path.join(logdir, pkl_name)
         torch.save(state, save_path)
         print(f'Model saved: {pkl_name}')
@@ -117,8 +117,8 @@ class NAE_Trainer():
         no_best_model_tolerance = 3
         no_best_model_count = 0
 
-        n_ae_epoch = 0
-        n_nae_epoch = 15
+        n_ae_epoch = self.config['ae_epoch']
+        n_nae_epoch = self.config['nae_epoch']
 
         ae_opt = ae_opt = Adam(self.model.parameters(), lr=ae_lr)
         l_params = [{'params': list(self.model.encoder.parameters()) + list(self.model.decoder.parameters())}]
@@ -159,7 +159,7 @@ class NAE_Trainer():
                     #print("validation loss:",d_val['loss'])
                     val_loss.append(d_val['loss'])
             if i_epoch % save_interval_epoch == 1:
-                self.save_model(self.model, best=False, i_iter=None, i_epoch=i_epoch)
+                self.save_model( best=False, i_iter=None, i_epoch=i_epoch)
                 print(f'Epoch [{i_epoch:d}] model saved {save_interval_epoch}')
 
             if no_best_model_count > no_best_model_tolerance:
@@ -222,3 +222,42 @@ class NAE_Trainer():
         #print(d_result)
 
         print("Training finished ")
+    def sampler(self):
+        self.model.eval()
+        self.model.replay = 0.95
+        dummy_x = torch.rand(1, 1, 128, 128, dtype=torch.float).to(self.device)
+        self.model._set_x_shape(dummy_x)
+        self.model._set_z_shape(dummy_x)
+
+        self.model.z_step = 20
+        self.model.x_step = 50
+
+
+        # run sampling
+        batch_size = 64
+        n_batch = int(np.ceil(10 / batch_size))
+        l_sample = []
+        for i_batch in tqdm(range(n_batch)):
+            if i_batch == n_batch - 1:
+                n_sample = 10 % batch_size if 10 % batch_size else batch_size
+            else:
+                n_sample = batch_size
+            d_sample = self.model.sample(n_sample=10, device=self.device)
+            sample = d_sample['sample_x'].detach()
+
+            # re-quantization
+            # sample = (sample * 255 + 0.5).clamp(0, 255).cpu().to(torch.uint8)
+            sample = (sample * 256).clamp(0, 255).cpu().to(torch.uint8)
+
+            sample = sample.permute(0, 2, 3, 1).numpy()
+
+
+            l_sample.append(sample)
+        sample = np.concatenate(l_sample)
+        plt.imshow(sample[4],'gray')
+        print(f'sample shape: {sample.shape}')
+
+        # save result
+        out_name = os.path.join('./logdir', 'anan.pkl')
+        np.save(out_name, sample)
+        print(f'sample saved at {out_name}')
